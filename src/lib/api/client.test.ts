@@ -31,8 +31,28 @@ describe("apiClient", () => {
     // "" — por eso se compara contra el path solo, no contra un env real.
     expect(url).toBe("/characters/1");
     expect(init.method).toBe("GET");
-    expect(init.headers).toMatchObject({ "Content-Type": "application/json" });
+    expect(new Headers(init.headers).get("Content-Type")).toBe(
+      "application/json",
+    );
     expect(init.body).toBeUndefined();
+  });
+
+  it("preserva headers pasados como `Headers` o array de tuplas sin perderlos", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(mockResponse(200, {}));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await apiClient.get("/characters/1", {
+      headers: new Headers({ Authorization: "Bearer token" }),
+    });
+    await apiClient.get("/characters/1", {
+      headers: [["Authorization", "Bearer token"]],
+    });
+
+    for (const [, init] of fetchMock.mock.calls) {
+      const headers = new Headers(init.headers);
+      expect(headers.get("Authorization")).toBe("Bearer token");
+      expect(headers.get("Content-Type")).toBe("application/json");
+    }
   });
 
   it("hace POST serializando el body como JSON", async () => {

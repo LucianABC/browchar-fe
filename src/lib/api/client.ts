@@ -39,11 +39,16 @@ export interface ApiRequestOptions extends Omit<RequestInit, "body"> {
 }
 
 function buildHeaders(headers?: HeadersInit): HeadersInit {
-  return {
-    "Content-Type": "application/json",
-    ...headers,
-    // Auth (DEV-5, TBD): agregar Authorization acá cuando exista token de sesión.
-  };
+  // `new Headers(...)` normaliza los tres shapes válidos de `HeadersInit`
+  // (Record, `Headers`, `[string, string][]`); un spread (`{ ...headers }`)
+  // solo funciona con el primero y silenciosamente pierde headers con los
+  // otros dos (ej. una `Authorization` seteada vía `new Headers(...)`).
+  const merged = new Headers(headers);
+  if (!merged.has("Content-Type")) {
+    merged.set("Content-Type", "application/json");
+  }
+  // Auth (DEV-5, TBD): agregar Authorization acá cuando exista token de sesión.
+  return merged;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
