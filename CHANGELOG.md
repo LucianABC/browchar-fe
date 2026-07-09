@@ -1,0 +1,41 @@
+# Changelog
+
+All notable changes to this project are documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [Unreleased]
+
+### Fixed
+
+- Pre-commit hook (`.husky/pre-commit`) no longer succeeds when an earlier
+  step (typecheck) fails — the three checks now run chained with `&&`
+  instead of as unchained lines. ([#4](https://github.com/LucianABC/browchar-fe/pull/4))
+- `scripts/check-test-pairs.mjs` paired-test gate now actually blocks
+  commits — it compared lint-staged's absolute file paths against
+  `git diff`'s repo-relative paths, so the check never matched anything.
+  ([#4](https://github.com/LucianABC/browchar-fe/pull/4))
+- `--font-sans` in `src/app/globals.css` referenced itself instead of
+  `--font-geist-sans`, silently dropping the app to the browser's default
+  font. ([#4](https://github.com/LucianABC/browchar-fe/pull/4))
+- `FieldDefinition.defaultValue` / `maxValue` / `options` were typed
+  `unknown`, which let malformed template entries pass type-checking
+  despite the field's own doc comments already stating the intended shape.
+  ([#4](https://github.com/LucianABC/browchar-fe/pull/4))
+- `character.types.ts`'s docblock incorrectly claimed `Playbook` mirrors
+  `updatedAt` the same way `Character` does; `Playbook` has no `updatedAt`
+  field. ([#4](https://github.com/LucianABC/browchar-fe/pull/4))
+- `package-lock.json` had 20 duplicate `node_modules/*` entries (JSON's
+  last-write-wins meant corrupted copies silently overrode the correct
+  ones), including two pure-JS packages incorrectly restricted to a single
+  OS (`freebsd`, `darwin`), which broke `npm install`/`npm ci` on every
+  other platform. Regenerated the lockfile from scratch.
+  ([#4](https://github.com/LucianABC/browchar-fe/pull/4))
+- Resolved a real `@babel/core` v7/v8 peer conflict between `shadcn` and an
+  unused optional peer of `@vitejs/plugin-react` (`@rolldown/plugin-babel`)
+  via a scoped `overrides` entry, instead of disabling peer-dep checking
+  project-wide. ([#4](https://github.com/LucianABC/browchar-fe/pull/4))
+- No `.gitattributes` existed, so on machines with `core.autocrlf=true`
+  every checkout silently converted the repo's LF files to CRLF, making
+  `prettier --check` flag nearly the whole tree with no real edits. Added
+  `eol=lf`. ([#4](https://github.com/LucianABC/browchar-fe/pull/4))
