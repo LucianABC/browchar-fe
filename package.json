@@ -12,6 +12,7 @@
     "format:check": "prettier --check .",
     "test": "vitest",
     "test:run": "vitest run",
+    "commit": "node scripts/commit.mjs",
     "prepare": "husky"
   },
   "dependencies": {
