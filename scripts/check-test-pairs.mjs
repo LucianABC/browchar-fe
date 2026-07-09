@@ -11,7 +11,13 @@ import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import path from "node:path";
 
-const candidates = process.argv.slice(2);
+const repoRoot = execSync("git rev-parse --show-toplevel", {
+  encoding: "utf8",
+}).trim();
+
+const candidates = process.argv
+  .slice(2)
+  .map((file) => path.relative(repoRoot, file).split(path.sep).join("/"));
 if (candidates.length === 0) process.exit(0);
 
 const addedFiles = new Set(
