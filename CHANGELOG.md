@@ -14,7 +14,7 @@ a known issue or a future consideration in a commit message.
 
 ### Fixed
 
-- **characters:** point home CTA to the creation form
+- **characters:** point home CTA to the creation form ([#16](https://github.com/LucianABC/browchar-fe/pull/16))
 - **dev:** pin frontend dev server to port 3001
 - Pre-commit hook (`.husky/pre-commit`) no longer succeeds when an earlier
   step (typecheck) fails — the three checks now run chained with `&&`
