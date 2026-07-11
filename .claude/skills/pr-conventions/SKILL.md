@@ -22,11 +22,19 @@ the `review-standards` skill; for commit message wording, use the
 
 ## PR title
 
-- Conventional Commits format: `type(scope): summary`, imperative mood,
-  no trailing period — matches the primary commit's subject line
-  (`feat(types): add frontend domain types`, `chore(tooling): pre-commit
-pipeline, Vitest setup, and project skills`).
-- If a branch has multiple commits, the title summarizes the PR as a whole,
+- Ticket-driven work: the title **must** lead with the Jira ticket key and
+  the ticket's name, then the Conventional Commits subject, in the form
+  `<TICKET> <ticket name> — type(scope): summary`. The `<ticket name>` is the
+  Jira issue's own title (verbatim, or lightly trimmed if very long), not a
+  paraphrase — e.g.
+  `DEV-155 Navbar shell — feat(nav): add navbar shell to root layout`.
+  Pull the exact name from Jira rather than inventing one.
+- Non-ticket work (chores/tooling with no ticket): plain Conventional Commits
+  format with no ticket reference, e.g.
+  `chore(tooling): add pre-commit pipeline, Vitest setup, and project skills`.
+- The Conventional Commits subject is imperative mood, no trailing period, and
+  matches the primary commit's subject line.
+- If a branch has multiple commits, the subject summarizes the PR as a whole,
   not just the last commit.
 
 ## PR body
