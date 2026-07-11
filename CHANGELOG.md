@@ -62,3 +62,7 @@ a known issue or a future consideration in a commit message.
   `catch (e) { if (e instanceof ApiError) ... }` will miss network failures
   entirely and need a separate branch for them until this is addressed.
   ([#6](https://github.com/LucianABC/browchar-fe/pull/6))
+
+### Future Considerations
+
+- submit is a local stub via an onSubmit seam. The real POST /characters mutation (TanStack Query) plus a QueryClientProvider still need wiring in the API-integration subtask before characters actually persist.
