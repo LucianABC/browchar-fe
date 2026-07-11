@@ -105,6 +105,57 @@ describe("CharacterCreateForm", () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
+  it("shows a general error and re-enables submit when onSubmit rejects", async () => {
+    const onSubmit = vi.fn().mockRejectedValue(new Error("La API no responde"));
+    render(
+      <CharacterCreateForm
+        playbooks={PLAYBOOKS}
+        initialPlaybookId="simple"
+        onSubmit={onSubmit}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText(/Nombre/), {
+      target: { value: "Aria" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Crear personaje" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "La API no responde",
+    );
+    expect(
+      screen.getByRole("button", { name: "Crear personaje" }),
+    ).not.toBeDisabled();
+  });
+
+  it("disables submit and shows a loading label while onSubmit is pending", async () => {
+    let resolveSubmit: () => void = () => {};
+    const onSubmit = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveSubmit = resolve;
+        }),
+    );
+    render(
+      <CharacterCreateForm
+        playbooks={PLAYBOOKS}
+        initialPlaybookId="simple"
+        onSubmit={onSubmit}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText(/Nombre/), {
+      target: { value: "Aria" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Crear personaje" }));
+
+    expect(await screen.findByText("Creando…")).toBeInTheDocument();
+    expect(screen.getByText("Creando…").closest("button")).toBeDisabled();
+
+    resolveSubmit();
+    expect(
+      await screen.findByText(/Personaje «Aria» listo para crear\./),
+    ).toBeInTheDocument();
+  });
+
   it("submits a valid payload through the onSubmit seam", async () => {
     const onSubmit = vi.fn().mockResolvedValue(undefined);
     render(
