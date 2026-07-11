@@ -24,6 +24,15 @@ interface DynamicFieldProps {
   error?: string;
 }
 
+/** Asterisco de campo obligatorio, oculto para lectores de pantalla. */
+function RequiredMark({ required }: { required?: boolean }) {
+  return required ? (
+    <span className="text-destructive" aria-hidden>
+      *
+    </span>
+  ) : null;
+}
+
 /**
  * Renderiza un campo del template del Playbook según su `FieldType` (DEV-50),
  * cableado a react-hook-form vía `Controller`. El nombre en el form es
@@ -55,11 +64,7 @@ export function DynamicField({ field, control, error }: DynamicFieldProps) {
   const labelNode = (
     <Label htmlFor={controlId}>
       {field.label}
-      {field.required ? (
-        <span className="text-destructive" aria-hidden>
-          *
-        </span>
-      ) : null}
+      <RequiredMark required={field.required} />
     </Label>
   );
 
@@ -102,11 +107,7 @@ export function DynamicField({ field, control, error }: DynamicFieldProps) {
                 />
                 <Label htmlFor={controlId}>
                   {field.label}
-                  {field.required ? (
-                    <span className="text-destructive" aria-hidden>
-                      *
-                    </span>
-                  ) : null}
+                  <RequiredMark required={field.required} />
                 </Label>
               </div>
               {description}
@@ -165,7 +166,7 @@ export function DynamicField({ field, control, error }: DynamicFieldProps) {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                 >
-                  <SelectValue placeholder="Elegí una opción">
+                  <SelectValue>
                     {(value) =>
                       options.find((option) => option.value === value)?.label ??
                       "Elegí una opción"
@@ -236,11 +237,7 @@ export function DynamicField({ field, control, error }: DynamicFieldProps) {
                 className="flex items-center gap-2 text-sm leading-none font-medium"
               >
                 {field.label}
-                {field.required ? (
-                  <span className="text-destructive" aria-hidden>
-                    *
-                  </span>
-                ) : null}
+                <RequiredMark required={field.required} />
               </span>
             ) : (
               labelNode

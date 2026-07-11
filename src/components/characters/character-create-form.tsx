@@ -85,6 +85,17 @@ export function CharacterCreateForm({
     [playbooks, selectedPlaybookId],
   );
 
+  // El schema y los defaults dependen solo del playbook elegido: los memoizamos
+  // para no reconstruir el schema Zod en cada render.
+  const resolver = useMemo(
+    () => zodResolver(buildCharacterSchema(selectedPlaybook)),
+    [selectedPlaybook],
+  );
+  const defaultValues = useMemo(
+    () => buildDefaultValues(selectedPlaybook),
+    [selectedPlaybook],
+  );
+
   const {
     control,
     register,
@@ -92,8 +103,8 @@ export function CharacterCreateForm({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<CharacterFormValues>({
-    resolver: zodResolver(buildCharacterSchema(selectedPlaybook)),
-    defaultValues: buildDefaultValues(selectedPlaybook),
+    resolver,
+    defaultValues,
     mode: "onSubmit",
   });
 
@@ -158,7 +169,7 @@ export function CharacterCreateForm({
           <Label htmlFor="game-select">Juego</Label>
           <Select value={selectedGameId} onValueChange={handleGameChange}>
             <SelectTrigger id="game-select" className="w-full">
-              <SelectValue placeholder="Elegí un juego">
+              <SelectValue>
                 {(value) =>
                   games.find((g) => g.gameId === value)?.gameName ??
                   "Elegí un juego"
@@ -186,13 +197,7 @@ export function CharacterCreateForm({
               className="w-full"
               disabled={!selectedGameId}
             >
-              <SelectValue
-                placeholder={
-                  selectedGameId
-                    ? "Elegí un playbook"
-                    : "Elegí un juego primero"
-                }
-              >
+              <SelectValue>
                 {(value) =>
                   playbooks.find((p) => p.id === value)?.name ??
                   (selectedGameId
