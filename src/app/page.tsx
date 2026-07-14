@@ -1,28 +1,24 @@
 import Link from "next/link";
-import { Dices, Plus, Swords } from "lucide-react";
+import { ArrowRight, Dices, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { CharacterCard } from "@/components/characters/character-card";
+import type { CharacterSummary } from "@/lib/types";
 
 /**
  * Placeholder hasta que exista el feature de Characters (hook + api module,
  * ver skill add-feature). El back todavía no expone "personajes recientes"
- * resuelto con nombre de playbook.
+ * resuelto con nombre de playbook, game y campaign — misma vista y mismo
+ * `CharacterCard` que usa `/characters` (DEV-56).
  */
-const RECENT_CHARACTERS = [
+const RECENT_CHARACTERS: CharacterSummary[] = [
   {
     id: "1",
     name: "Kaelith Duskbane",
     playbookName: "Guerrero",
     gameName: "D&D 5e",
+    campaignName: "La Caída de Baldur's Gate",
   },
   {
     id: "2",
@@ -75,6 +71,15 @@ export default function Home() {
           <h2 className="font-heading text-xl font-semibold tracking-wide">
             Tus personajes recientes
           </h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            nativeButton={false}
+            render={<Link href="/characters" />}
+          >
+            Ver todos
+            <ArrowRight data-icon="inline-end" />
+          </Button>
         </div>
 
         {RECENT_CHARACTERS.length === 0 ? (
@@ -87,18 +92,7 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {RECENT_CHARACTERS.map((character) => (
-              <Card key={character.id}>
-                <CardHeader>
-                  <CardTitle className="font-heading flex items-center gap-2 text-lg tracking-wide">
-                    <Swords className="text-primary size-4" aria-hidden />
-                    {character.name}
-                  </CardTitle>
-                  <CardDescription>{character.playbookName}</CardDescription>
-                </CardHeader>
-                <CardFooter>
-                  <Badge variant="secondary">{character.gameName}</Badge>
-                </CardFooter>
-              </Card>
+              <CharacterCard key={character.id} character={character} />
             ))}
           </div>
         )}

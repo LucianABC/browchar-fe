@@ -1,38 +1,35 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 
-import type { CharacterView } from "@/lib/types";
+import type { CharacterSummary } from "@/lib/types";
 import { CharacterCard } from "./character-card";
 
-const CHARACTER: CharacterView = {
+const CHARACTER: CharacterSummary = {
   id: "char_1",
   name: "Mad Dog",
-  ownerId: "usr_demo",
-  values: { cool: 3, look: "Cuero y cadenas" },
-  createdAt: "2026-01-15T12:00:00.000Z",
-  updatedAt: "2026-01-15T12:00:00.000Z",
-  deletedAt: null,
-  playbookId: "playbook_1",
-  playbookVersion: 1,
+  playbookName: "Motorista",
+  gameName: "Apocalypse World",
+  campaignName: "Ruinas de Neo Tokio",
 };
 
 describe("CharacterCard", () => {
-  it("muestra el nombre del personaje", () => {
+  it("muestra el nombre y el playbook del personaje", () => {
     render(<CharacterCard character={CHARACTER} />);
     expect(screen.getByText("Mad Dog")).toBeInTheDocument();
+    expect(screen.getByText("Motorista")).toBeInTheDocument();
   });
 
-  it("muestra hasta dos entradas de values", () => {
+  it("muestra el juego y la campaña cuando corresponde", () => {
     render(<CharacterCard character={CHARACTER} />);
-    expect(screen.getByText("cool:")).toBeInTheDocument();
-    expect(screen.getByText("3")).toBeInTheDocument();
-    expect(screen.getByText("look:")).toBeInTheDocument();
-    expect(screen.getByText("Cuero y cadenas")).toBeInTheDocument();
+    expect(screen.getByText("Apocalypse World")).toBeInTheDocument();
+    expect(screen.getByText("Ruinas de Neo Tokio")).toBeInTheDocument();
   });
 
-  it("no rompe cuando values está vacío", () => {
-    render(<CharacterCard character={{ ...CHARACTER, values: {} }} />);
-    expect(screen.getByText("Mad Dog")).toBeInTheDocument();
+  it("no muestra badge de campaña cuando el personaje no tiene una", () => {
+    render(
+      <CharacterCard character={{ ...CHARACTER, campaignName: undefined }} />,
+    );
+    expect(screen.queryByText("Ruinas de Neo Tokio")).not.toBeInTheDocument();
   });
 
   it("linkea al detalle del personaje", () => {

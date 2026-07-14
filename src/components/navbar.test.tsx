@@ -16,12 +16,16 @@ describe("Navbar", () => {
     );
   });
 
-  it("renders navigation links to the dashboard, games and playbooks", () => {
+  it("renders navigation links to the dashboard, characters, games and playbooks", () => {
     usePathname.mockReturnValue("/");
     render(<Navbar />);
     expect(screen.getByRole("button", { name: "Dashboard" })).toHaveAttribute(
       "href",
       "/",
+    );
+    expect(screen.getByRole("button", { name: "Personajes" })).toHaveAttribute(
+      "href",
+      "/characters",
     );
     expect(screen.getByRole("button", { name: "Juegos" })).toHaveAttribute(
       "href",

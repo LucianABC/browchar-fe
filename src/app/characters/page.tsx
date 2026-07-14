@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { CharactersList } from "@/components/characters/characters-list";
-import type { CharacterView } from "@/lib/types";
+import type { CharacterSummary } from "@/lib/types";
 
 /**
  * Pantalla de listado de personajes (DEV-56).
@@ -11,30 +11,28 @@ import type { CharacterView } from "@/lib/types";
  * La integración real con `GET /characters` es DEV-60 — cuando esté lista,
  * este stub se reemplaza por un hook (`useCharacters`) que le pasa
  * `characters`/`isPending`/`isError` a `CharactersList` sin tocar el
- * componente visual.
+ * componente visual. Misma vista que la home ("Tus personajes recientes"),
+ * vía el `CharacterCard` compartido.
  */
-const SAMPLE_CHARACTERS: CharacterView[] = [
+const SAMPLE_CHARACTERS: CharacterSummary[] = [
   {
     id: "char_1",
     name: "Mad Dog",
-    ownerId: "usr_demo",
-    values: { cool: 3, look: "Cuero y cadenas" },
-    createdAt: "2026-01-15T12:00:00.000Z",
-    updatedAt: "2026-01-15T12:00:00.000Z",
-    deletedAt: null,
-    playbookId: "playbook_1",
-    playbookVersion: 1,
+    playbookName: "Motorista",
+    gameName: "Apocalypse World",
+    campaignName: "Ruinas de Neo Tokio",
   },
   {
     id: "char_2",
     name: "Silent Star",
-    ownerId: "usr_demo",
-    values: { hard: 2, gear: "Cuchillo, radio" },
-    createdAt: "2026-02-02T12:00:00.000Z",
-    updatedAt: "2026-02-02T12:00:00.000Z",
-    deletedAt: null,
-    playbookId: "playbook_2",
-    playbookVersion: 1,
+    playbookName: "Ángel",
+    gameName: "Apocalypse World",
+  },
+  {
+    id: "char_3",
+    name: "Kaelith Duskbane",
+    playbookName: "Guerrero",
+    gameName: "D&D 5e",
   },
 ];
 
