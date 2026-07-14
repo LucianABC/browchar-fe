@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 import type { CharacterSummary } from "@/lib/types";
@@ -15,6 +15,15 @@ const CHARACTER: CharacterSummary = {
 };
 
 describe("CharacterCard", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-01T18:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("muestra el nombre y el playbook del personaje", () => {
     render(<CharacterCard character={CHARACTER} />);
     expect(screen.getByText("Mad Dog")).toBeInTheDocument();
@@ -45,10 +54,14 @@ describe("CharacterCard", () => {
     );
   });
 
-  it("muestra la fecha de creación y de última edición", () => {
+  it("muestra la fecha de creación absoluta y el tiempo relativo desde la última edición", () => {
     render(<CharacterCard character={CHARACTER} />);
-    expect(screen.getByText(/Creado el/)).toHaveTextContent("2026");
-    expect(screen.getByText(/Última edición el/)).toHaveTextContent("2026");
+    expect(screen.getByText(/Creado el/)).toHaveTextContent(
+      "Creado el 1 de abr de 2026",
+    );
+    const lastEdited = screen.getByText(/Última edición/);
+    expect(lastEdited).toHaveTextContent("Última edición hace 3 días");
+    expect(lastEdited).toHaveAttribute("title", "28 de abr de 2026");
   });
 
   it("linkea al detalle del personaje", () => {

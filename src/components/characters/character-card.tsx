@@ -15,22 +15,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { CharacterSummary } from "@/lib/types";
-
-const dateFormatter = new Intl.DateTimeFormat("es-AR", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-
-function formatDate(iso: string) {
-  return dateFormatter.format(new Date(iso));
-}
+import { formatDate, formatRelativeDate } from "@/lib/dates";
 
 /**
  * Tarjeta de un Character. Presentacional: no fetchea, recibe el dato por
  * prop. Misma vista que usa la home en "Tus personajes recientes" (DEV-56):
- * chips de Game/Campaign arriba, `name`, Playbook (hace de raza/clase) y las
- * fechas de creación/última edición.
+ * chips de Game/Campaign arriba, `name`, Playbook (hace de raza/clase),
+ * fecha de creación (absoluta) y de última edición (relativa a ahora, con la
+ * fecha absoluta en el `title` para quien la necesite exacta).
  *
  * "Editar" linkea a `/characters/:id/edit`, que todavía no existe — se arma
  * junto con la pantalla de detalle. Mismo criterio que "Ver detalle": el
@@ -70,7 +62,9 @@ export function CharacterCard({ character }: { character: CharacterSummary }) {
       </CardHeader>
       <CardContent className="text-muted-foreground flex flex-col gap-1 text-xs">
         <p>Creado el {formatDate(character.createdAt)}</p>
-        <p>Última edición el {formatDate(character.updatedAt)}</p>
+        <p title={formatDate(character.updatedAt)}>
+          Última edición {formatRelativeDate(character.updatedAt)}
+        </p>
       </CardContent>
       <CardFooter className="gap-2">
         <Button
