@@ -1,42 +1,19 @@
 import Link from "next/link";
-import { Dices, Plus, Swords } from "lucide-react";
+import { ArrowRight, Dices, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { CharacterCard } from "@/components/characters/character-card";
+import { SAMPLE_CHARACTERS } from "@/mocks/sample-characters";
 
 /**
  * Placeholder hasta que exista el feature de Characters (hook + api module,
  * ver skill add-feature). El back todavía no expone "personajes recientes"
- * resuelto con nombre de playbook.
+ * resuelto con nombre de playbook, game y campaign. Usa los primeros N de
+ * `SAMPLE_CHARACTERS` (mismos datos que `/characters`, DEV-56) para que ambas
+ * pantallas nunca diverjan.
  */
-const RECENT_CHARACTERS = [
-  {
-    id: "1",
-    name: "Kaelith Duskbane",
-    playbookName: "Guerrero",
-    gameName: "D&D 5e",
-  },
-  {
-    id: "2",
-    name: "Voss Ironhollow",
-    playbookName: "Clérigo",
-    gameName: "D&D 5e",
-  },
-  {
-    id: "3",
-    name: "Nyra Emberfall",
-    playbookName: "Piromante",
-    gameName: "Pathfinder",
-  },
-];
+const RECENT_CHARACTERS = SAMPLE_CHARACTERS.slice(0, 3);
 
 export default function Home() {
   return (
@@ -75,6 +52,15 @@ export default function Home() {
           <h2 className="font-heading text-xl font-semibold tracking-wide">
             Tus personajes recientes
           </h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            nativeButton={false}
+            render={<Link href="/characters" />}
+          >
+            Ver todos
+            <ArrowRight data-icon="inline-end" />
+          </Button>
         </div>
 
         {RECENT_CHARACTERS.length === 0 ? (
@@ -87,18 +73,7 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {RECENT_CHARACTERS.map((character) => (
-              <Card key={character.id}>
-                <CardHeader>
-                  <CardTitle className="font-heading flex items-center gap-2 text-lg tracking-wide">
-                    <Swords className="text-primary size-4" aria-hidden />
-                    {character.name}
-                  </CardTitle>
-                  <CardDescription>{character.playbookName}</CardDescription>
-                </CardHeader>
-                <CardFooter>
-                  <Badge variant="secondary">{character.gameName}</Badge>
-                </CardFooter>
-              </Card>
+              <CharacterCard key={character.id} character={character} />
             ))}
           </div>
         )}

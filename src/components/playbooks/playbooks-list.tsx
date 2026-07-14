@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryEmpty, QueryError, QueryLoading } from "@/components/query-state";
-import { usePlaybooks } from "@/lib/playbooks/use-playbooks";
+import { usePlaybooks } from "@/hooks/use-playbooks";
 import { PlaybookCard } from "./playbook-card";
 
 interface PlaybooksListProps {

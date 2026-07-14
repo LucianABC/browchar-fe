@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { PlaybookView } from "@/lib/types";
+import type { PlaybookView } from "@/types";
 
 /** Tarjeta de un Playbook. Presentacional: no fetchea, recibe el dato por prop. */
 export function PlaybookCard({ playbook }: { playbook: PlaybookView }) {

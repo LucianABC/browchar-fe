@@ -14,7 +14,7 @@ Look for `components.json` at the repo root.
 
 - **If it exists**: read it first. It is the source of truth for `style`,
   `baseColor`, `iconLibrary` and — most importantly — the `aliases` block
-  (`@/components`, `@/components/ui`, `@/lib`, `@/hooks`). Never hardcode a
+  (`@/components`, `@/components/ui`, `@/utils`, `@/hooks`). Never hardcode a
   relative import path (`../../ui/button`) when an alias exists.
 - **If it doesn't exist** (e.g. a fresh branch cut before shadcn was set up):
   initialize it with these exact settings so every branch converges on the
@@ -44,7 +44,7 @@ it as-is), treat that added logic as project code:
 
 - Use `cva` (`class-variance-authority`) for variants, consistent with the
   rest of `src/components/ui`.
-- Use the `cn()` helper from `@/lib/utils` (never manual string
+- Use the `cn()` helper from `@/utils/cn` (never manual string
   concatenation) for conditional class names.
 - Write a `*.test.tsx` next to the component for the custom behavior you
   added — plain vendor primitives with no added logic are exempt from the

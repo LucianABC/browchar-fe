@@ -30,4 +30,12 @@ describe("Home", () => {
     expect(screen.getByText("Voss Ironhollow")).toBeInTheDocument();
     expect(screen.getByText("Nyra Emberfall")).toBeInTheDocument();
   });
+
+  it("links to the full characters list", () => {
+    render(<Home />);
+    expect(screen.getByRole("button", { name: /ver todos/i })).toHaveAttribute(
+      "href",
+      "/characters",
+    );
+  });
 });

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { apiClient } from "@/lib/api/client";
-import type { Game } from "@/lib/types";
+import { apiClient } from "@/api/client";
+import type { Game } from "@/types";
 
 /**
  * Lista de juegos disponibles.

@@ -14,7 +14,7 @@ Every commit triggers a set of automated checks via **husky** + **lint-staged**.
 Handled by `lint-staged` (`lint-staged.config.mjs`) — only touches files you're committing, so it's fast.
 
 - **ESLint** (`eslint --fix`) — enforces code quality rules, including `no-console` (not allowed in committed code) and the shared `@typescript-eslint/no-unused-vars` rule (names prefixed with `_` are ignored).
-- **Paired-test gate** (`node scripts/check-test-pairs.mjs`) — any newly added file under `src/app`, `src/components`, or `src/lib` must ship with a sibling `*.test.ts(x)`, unless it's exempt (pure `*.types.ts`, barrels, or vendor `components/ui/*` primitives).
+- **Paired-test gate** (`node scripts/check-test-pairs.mjs`) — any newly added file under `src/app`, `src/components`, `src/hooks`, `src/types`, `src/api`, `src/schemas`, `src/mocks`, or `src/utils` must ship with a sibling `*.test.ts(x)`, unless it's exempt (pure `*.types.ts`, barrels, or vendor `components/ui/*` primitives).
 - **Prettier** (`prettier --write`) — auto-formats code, plus `json`/`css`/`md` and other config files.
 
 ### 2. Type check (full project)

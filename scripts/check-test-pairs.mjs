@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * Pre-commit gate: every newly added source file under src/app, src/components
- * or src/lib must ship with a sibling test file in the same commit.
+ * Pre-commit gate: every newly added source file under src/app, src/components,
+ * src/hooks, src/types, src/api, src/schemas, src/mocks or src/utils must ship
+ * with a sibling test file in the same commit.
  *
  * Invoked by lint-staged with the staged file paths as argv. Filters those
  * down to files git reports as "added" (renames/edits are exempt) and
@@ -55,7 +56,7 @@ function hasTestSibling(file) {
 const missing = candidates.filter(
   (file) =>
     addedFiles.has(file) &&
-    /^src\/(app|components|lib)\//.test(file) &&
+    /^src\/(app|components|hooks|types|api|schemas|mocks|utils)\//.test(file) &&
     !isExempt(file) &&
     !hasTestSibling(file),
 );

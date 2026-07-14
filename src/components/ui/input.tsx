@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Input as InputPrimitive } from "@base-ui/react/input";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
 /** @example <Input type="email" placeholder="tu@email.com" aria-invalid={!!error} /> */
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {

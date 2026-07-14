@@ -7,21 +7,35 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Folder structure
 
-Organizá por responsabilidad, **no** por co-ubicación en la ruta. Una carpeta de
-ruta nunca contiene componentes reutilizables ni lógica de dominio.
+Organizá por responsabilidad, **no** por co-ubicación en la ruta ni por
+dominio. Una carpeta de ruta nunca contiene componentes reutilizables ni
+lógica de dominio; `src/lib/` no existe — cada tipo de artefacto no-UI tiene
+su propia carpeta top-level:
 
 - `src/app/` = solo **rutas** (App Router). `page.tsx` / `layout.tsx` finos:
   resuelven `params`/`searchParams`/datos y delegan la UI. No existe `pages/`.
 - `src/components/<dominio>/` = **UI de dominio** reutilizable (primitivos shadcn
   en `src/components/ui/`).
-- `src/lib/<dominio>/` = **lógica no-UI** (schemas Zod, helpers). Tipos en
-  `src/lib/types/`, cliente HTTP en `src/lib/api/`, mocks en `src/lib/mocks/`.
-  Los tipos y la validación de dominio compartidos con la API (`FieldType`,
+- `src/hooks/` = hooks de TanStack Query (`use-games.ts`, `use-playbooks.ts`,
+  `use-create-character.ts`), uno por endpoint/mutación, sin subcarpetas por
+  dominio.
+- `src/types/` = tipos de dominio, espejo de los modelos de browchar-api.
+  Los tipos y la validación compartidos con la API (`FieldType`,
   `FieldDefinition`, `buildTemplateSchema`, los schemas de request) vienen del
   paquete `@tpklabs/browchar-contracts` — no los redefinas a mano (DEV-153).
-  `src/lib/types/*` re-exporta de ahí por compatibilidad; código nuevo importa
+  `src/types/*` re-exporta de ahí por compatibilidad; código nuevo importa
   directo del paquete.
+- `src/api/` = el cliente HTTP (`client.ts`).
+- `src/schemas/` = schemas Zod + lógica de validación/defaults específica de un
+  dominio (ej. `character-schema.ts`: schema y defaults del form de creación de
+  personaje). No es un hook ni un tipo ni un util genérico.
+- `src/mocks/` = datos de ejemplo compartidos entre pantallas (ej.
+  `sample-characters.ts`, usado tanto por la home como por `/characters`).
+- `src/utils/` = helpers genéricos, reusables entre dominios (`cn.ts`,
+  `dates.ts`). Si algo es específico de un dominio, no es un util — va en
+  `schemas/`, `hooks/` o el componente que lo usa.
 
-Importá siempre por alias `@/...`. Todo archivo nuevo bajo `src/app|components|lib`
-va con su test pareado (salvo `*.types.ts`, `index.*` y `components/ui/`). Ver
-"Estructura del proyecto" en el README para el detalle y un ejemplo.
+Importá siempre por alias `@/...`. Todo archivo nuevo bajo
+`src/app|components|hooks|types|api|schemas|mocks|utils` va con su test
+pareado (salvo `*.types.ts`, `index.*` y `components/ui/`). Ver "Estructura
+del proyecto" en el README para el detalle y un ejemplo.

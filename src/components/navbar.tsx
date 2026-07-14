@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 
 const NAV_LINKS = [
   { href: "/", label: "Dashboard" },
+  { href: "/characters", label: "Personajes" },
   { href: "/games", label: "Juegos" },
   { href: "/playbooks", label: "Playbooks" },
 ];

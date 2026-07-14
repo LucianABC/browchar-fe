@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 
-import type { Game } from "@/lib/types";
+import type { Game } from "@/types";
 import { GamesList } from "./games-list";
 
 const GAMES: Game[] = [

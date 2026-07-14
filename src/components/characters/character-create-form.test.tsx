@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-import { FieldType, type PlaybookView } from "@/lib/types";
-import { ApiError } from "@/lib/api/client";
+import { FieldType, type PlaybookView } from "@/types";
+import { ApiError } from "@/api/client";
 import { CharacterCreateForm } from "./character-create-form";
 
 const SIMPLE: PlaybookView = {

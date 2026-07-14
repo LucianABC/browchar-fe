@@ -10,7 +10,7 @@
  * - `pagination.types`: envelope `data`/`meta` compartido por endpoints
  *   paginados.
  *
- * Import recomendado: `import type { Character, Playbook } from '@/lib/types'`.
+ * Import recomendado: `import type { Character, Playbook } from '@/types'`.
  */
 
 export * from "./fields.types";

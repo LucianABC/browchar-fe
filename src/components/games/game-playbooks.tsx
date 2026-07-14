@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { useGames } from "@/lib/games/use-games";
+import { useGames } from "@/hooks/use-games";
 import { PlaybooksList } from "@/components/playbooks/playbooks-list";
 
 /**

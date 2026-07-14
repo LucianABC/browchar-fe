@@ -2,8 +2,8 @@
 
 import { Loader2 } from "lucide-react";
 
-import { usePlaybooks } from "@/lib/playbooks/use-playbooks";
-import { useCreateCharacter } from "@/lib/characters/use-create-character";
+import { usePlaybooks } from "@/hooks/use-playbooks";
+import { useCreateCharacter } from "@/hooks/use-create-character";
 import { CharacterCreateForm } from "./character-create-form";
 
 interface CharacterCreateFormContainerProps {
