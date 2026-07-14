@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 
-import { FieldType, type PlaybookView } from "@/lib/types";
+import { FieldType, type PlaybookView } from "@/types";
 import { CharacterCreateFormContainer } from "./character-create-form-container";
 
 const PLAYBOOKS: PlaybookView[] = [

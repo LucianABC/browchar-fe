@@ -24,14 +24,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { CreateCharacterInput, PlaybookView } from "@/lib/types";
-import { ApiError } from "@/lib/api/client";
+import type { CreateCharacterInput, PlaybookView } from "@/types";
+import { ApiError } from "@/api/client";
 
 import {
   buildCharacterSchema,
   buildDefaultValues,
   type CharacterFormValues,
-} from "@/lib/characters/character-schema";
+} from "@/schemas/character-schema";
 import { DynamicField } from "./dynamic-field";
 
 /**

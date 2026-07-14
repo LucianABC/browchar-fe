@@ -1,13 +1,13 @@
 ---
 name: add-feature
-description: Wire an existing domain type from src/lib/types into a full feature -- zod schema, react-hook-form, and a TanStack Query hook. Use when asked to build a form, mutation, or data-fetching feature for a domain entity (Character, Playbook, etc.).
+description: Wire an existing domain type from src/types into a full feature -- zod schema, react-hook-form, and a TanStack Query hook. Use when asked to build a form, mutation, or data-fetching feature for a domain entity (Character, Playbook, etc.).
 ---
 
 # Add a feature for an existing domain type
 
-This project's domain types in `src/lib/types/*.types.ts` are a deliberate
+This project's domain types in `src/types/*.types.ts` are a deliberate
 mirror of `browchar-api`'s Prisma models and Zod request schemas (see the
-header comment in `src/lib/types/index.ts`). Don't invent fields — the type
+header comment in `src/types/index.ts`). Don't invent fields — the type
 file is the contract.
 
 ## 1. Start from the type, not from the form
@@ -27,9 +27,9 @@ the exact message wording from the comments, say so explicitly instead of
 guessing, since the project convention is that front and back show matching
 messages.
 
-Co-locate the schema near the feature (not inside `src/lib/types`, which is
-kept as pure mirrored type declarations with no runtime logic — that's also
-why `*.types.ts` files are exempt from the paired-test rule).
+Put the schema in `src/schemas/` (not inside `src/types`, which is kept as
+pure mirrored type declarations with no runtime logic — that's also why
+`*.types.ts` files are exempt from the paired-test rule).
 
 ## 3. Form with react-hook-form + zod
 
@@ -44,9 +44,10 @@ not duplicated in the form.
 ## 4. TanStack Query hook
 
 Wrap the request in a `useMutation` (for create/update) or `useQuery` (for
-reads) hook. Keep query keys consistent and colocated with the feature (e.g.
-`["characters", characterId]`). Don't call `fetch` directly from components —
-funnel it through the hook so caching/invalidation stays centralized.
+reads) hook, in `src/hooks/` (e.g. `src/hooks/use-create-character.ts`). Keep
+query keys consistent (e.g. `["characters", characterId]`). Don't call
+`fetch` directly from components — funnel it through the hook so
+caching/invalidation stays centralized.
 
 ## 5. Tests
 
@@ -58,8 +59,9 @@ Add tests for:
   calls the mutation with the right payload) — not implementation details.
 
 This matches the pre-commit paired-test rule: any new file under `src/app`,
-`src/components`, or `src/lib` needs a sibling `*.test.ts(x)` unless it's
-exempt (pure types, barrels, shadcn `components/ui` vendor files).
+`src/components`, `src/hooks`, `src/types`, `src/api`, `src/schemas`,
+`src/mocks`, or `src/utils` needs a sibling `*.test.ts(x)` unless it's exempt
+(pure types, barrels, shadcn `components/ui` vendor files).
 
 ## 6. Before finishing
 

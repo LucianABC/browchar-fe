@@ -14,8 +14,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { CharacterSummary } from "@/lib/types";
-import { formatDate, formatRelativeDate } from "@/lib/dates";
+import type { CharacterSummary } from "@/types";
+import { formatDate, formatRelativeDate } from "@/utils/dates";
 
 /**
  * Tarjeta de un Character. Presentacional: no fetchea, recibe el dato por

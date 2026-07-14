@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { apiClient } from "@/lib/api/client";
-import type { PlaybookView } from "@/lib/types";
+import { apiClient } from "@/api/client";
+import type { PlaybookView } from "@/types";
 
 /**
  * `GET /playbooks` acepta un `gameId` opcional (`?gameId=...`) para filtrar

@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { useForm } from "react-hook-form";
 
-import { FieldType, type FieldDefinition } from "@/lib/types";
+import { FieldType, type FieldDefinition } from "@/types";
 import { DynamicField } from "./dynamic-field";
-import type { CharacterFormValues } from "@/lib/characters/character-schema";
+import type { CharacterFormValues } from "@/schemas/character-schema";
 
 function Harness({ field, error }: { field: FieldDefinition; error?: string }) {
   const { control } = useForm<CharacterFormValues>({

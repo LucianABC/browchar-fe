@@ -2,7 +2,7 @@
 
 import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import { CheckIcon } from "lucide-react";
 
 /** @example <Checkbox checked={value} onCheckedChange={setValue} aria-invalid={!!error} /> */

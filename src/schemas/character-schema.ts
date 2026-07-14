@@ -6,7 +6,7 @@ import {
   type FieldDefinition,
 } from "@tpklabs/browchar-contracts";
 
-import type { PlaybookView } from "@/lib/types";
+import type { PlaybookView } from "@/types";
 
 /**
  * Schema y defaults del form de creación de personaje (DEV-50).

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { CharactersList } from "@/components/characters/characters-list";
-import { SAMPLE_CHARACTERS } from "@/lib/mocks/sample-characters";
+import { SAMPLE_CHARACTERS } from "@/mocks/sample-characters";
 
 /**
  * Pantalla de listado de personajes (DEV-56).

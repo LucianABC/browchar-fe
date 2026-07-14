@@ -31,9 +31,9 @@ Do not assume the signature from memory.
   page goes in `src/app/characters/[id]/page.tsx`.
 - Server Component by default. Only add `"use client"` at the top of the
   file if it needs hooks, event handlers, or browser-only APIs.
-- Use the `@/*` path alias (`@/lib/...`, `@/components/...`) for anything
+- Use the `@/*` path alias (`@/hooks/...`, `@/components/...`) for anything
   outside the current route segment — never deep relative imports.
-- If the route needs data types, pull them from `src/lib/types` — don't
+- If the route needs data types, pull them from `src/types` — don't
   redefine shapes that already mirror the backend (`browchar-api`) there.
 
 ## 3. Testing

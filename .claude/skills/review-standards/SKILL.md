@@ -15,25 +15,26 @@ violated — don't restate items that already comply.
 
 ## Structure & imports
 
-- Uses the `@/*` alias (`@/lib`, `@/components`, `@/components/ui`, `@/hooks`)
-  instead of deep relative imports (`../../../lib/utils`).
+- Uses the `@/*` alias (`@/hooks`, `@/types`, `@/utils`, `@/components`,
+  `@/components/ui`) instead of deep relative imports (`../../../utils/cn`).
 - New `src/components/ui/*` files match `components.json` (`style`,
   `baseColor`, `iconLibrary`) rather than introducing a different pattern.
 
 ## Types & schemas
 
-- Domain shapes come from `src/lib/types/*.types.ts`, not redefined inline.
+- Domain shapes come from `src/types/*.types.ts`, not redefined inline.
   If a PR adds a new inline `interface`/`type` that duplicates or diverges
   from an existing one there, flag it.
-- Any new Zod schema mirrors the corresponding `*Input` type from
-  `src/lib/types` field-for-field (required/optional, nesting).
+- Any new Zod schema (in `src/schemas/`) mirrors the corresponding `*Input`
+  type from `src/types` field-for-field (required/optional, nesting).
 - `*.types.ts` files stay declaration-only (no runtime logic) — that's why
   they're exempt from the paired-test rule; a `.types.ts` file with actual
   logic in it is itself a finding.
 
 ## Tests
 
-- Every new file under `src/app`, `src/components`, or `src/lib` has a
+- Every new file under `src/app`, `src/components`, `src/hooks`, `src/types`,
+  `src/api`, `src/schemas`, `src/mocks`, or `src/utils` has a
   sibling `*.test.ts(x)` (or `__tests__/*.test.ts(x)`), unless it's a type-only
   file, a barrel `index.ts`, or a vendor `components/ui/*` primitive used
   as-is. This is also enforced mechanically by

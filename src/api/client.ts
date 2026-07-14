@@ -1,4 +1,4 @@
-import type { ValidationError } from "@/lib/types";
+import type { ValidationError } from "@/types";
 
 /**
  * Cliente HTTP base (DEV-82).

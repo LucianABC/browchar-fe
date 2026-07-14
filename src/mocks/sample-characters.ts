@@ -1,4 +1,4 @@
-import type { CharacterSummary } from "@/lib/types";
+import type { CharacterSummary } from "@/types";
 
 /**
  * Datos de ejemplo compartidos entre la home ("Tus personajes recientes") y

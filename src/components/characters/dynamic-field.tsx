@@ -14,8 +14,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { FieldType, type FieldDefinition } from "@/lib/types";
-import type { CharacterFormValues } from "@/lib/characters/character-schema";
+import { FieldType, type FieldDefinition } from "@/types";
+import type { CharacterFormValues } from "@/schemas/character-schema";
 
 interface DynamicFieldProps {
   field: FieldDefinition;

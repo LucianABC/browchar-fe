@@ -7,7 +7,7 @@ Frontend de Browchar (Next.js). Consume la API en [`browchar-api`](#conexión-co
 - **Framework:** [Next.js 16](https://nextjs.org/docs) (App Router) + React 19 + TypeScript
 - **UI:** [shadcn/ui](https://ui.shadcn.com/) sobre `@base-ui/react`, Tailwind CSS v4, `class-variance-authority`, `tailwind-merge`
 - **Formularios/validación:** `react-hook-form` + `zod` (vía `@hookform/resolvers`)
-- **Data fetching:** TanStack Query (`@tanstack/react-query`), sobre un cliente HTTP propio en [`src/lib/api/client.ts`](src/lib/api/client.ts)
+- **Data fetching:** TanStack Query (`@tanstack/react-query`), sobre un cliente HTTP propio en [`src/api/client.ts`](src/api/client.ts)
 - **Testing:** Vitest + Testing Library (jsdom)
 - **Lint/format:** ESLint, Prettier
 - **Git hooks:** Husky + lint-staged, commitlint (Conventional Commits)
@@ -44,7 +44,7 @@ La app corre en `http://localhost:3001` (puerto fijo, seteado en el script `dev`
 
 El front no tiene backend propio: consume `browchar-api`. A qué API apunta se
 controla **únicamente** con `NEXT_PUBLIC_API_URL` (leída en
-[`src/lib/api/client.ts`](src/lib/api/client.ts)). Hay dos modos.
+[`src/api/client.ts`](src/api/client.ts)). Hay dos modos.
 
 ### Modo A — Todo local (desarrollo del stack completo)
 
@@ -101,7 +101,7 @@ npm run dev                   # http://localhost:3001, pegándole a prod
 
 ## Conexión con el backend
 
-El front no llama a `fetch` directo: todo pasa por `apiClient` ([`src/lib/api/client.ts`](src/lib/api/client.ts)), que:
+El front no llama a `fetch` directo: todo pasa por `apiClient` ([`src/api/client.ts`](src/api/client.ts)), que:
 
 - Resuelve la base URL desde `NEXT_PUBLIC_API_URL`
 - Serializa el body a JSON y setea `Content-Type` por defecto
@@ -124,13 +124,23 @@ reutilizables ni lógica de dominio.
 - **`src/components/`** — **UI reutilizable**. Primitivos shadcn/ui en
   `src/components/ui/` (vendor); componentes de dominio agrupados por entidad en
   `src/components/<dominio>/` (ej. `src/components/characters/`).
-- **`src/lib/`** — **lógica no-UI**, agrupada por área: `api/` (cliente HTTP),
-  `types/` (tipos de dominio, espejo del back), `mocks/`, y lógica por dominio en
-  `src/lib/<dominio>/` (ej. schemas Zod en `src/lib/characters/`).
+- **`src/hooks/`** — hooks de TanStack Query (`use-games.ts`,
+  `use-playbooks.ts`, `use-create-character.ts`), uno por endpoint/mutación.
+- **`src/types/`** — tipos de dominio, espejo del back.
+- **`src/api/`** — el cliente HTTP (`client.ts`).
+- **`src/schemas/`** — schemas Zod + validación/defaults específicos de un
+  dominio (ej. `character-schema.ts`).
+- **`src/mocks/`** — datos de ejemplo compartidos entre pantallas.
+- **`src/utils/`** — helpers genéricos y reusables entre dominios (`cn.ts`,
+  `dates.ts`).
 
-**Regla:** un `page.tsx` importa desde `@/components/...` y `@/lib/...` (siempre
-por alias `@/`, nunca relativo profundo). La UI reutilizable y la
-validación/lógica **nunca** viven dentro de la carpeta de la ruta.
+No existe `src/lib/`: cada tipo de artefacto no-UI vive en su propia carpeta
+top-level en vez de agruparse por dominio dentro de una carpeta genérica.
+
+**Regla:** un `page.tsx` importa desde `@/components/...`, `@/hooks/...`,
+`@/types/...`, etc. (siempre por alias `@/`, nunca relativo profundo). La UI
+reutilizable y la validación/lógica **nunca** viven dentro de la carpeta de
+la ruta.
 
 Ejemplo — feature "crear personaje" (DEV-50):
 
@@ -138,13 +148,15 @@ Ejemplo — feature "crear personaje" (DEV-50):
 src/app/characters/new/page.tsx                    ← ruta (fina)
 src/components/characters/character-create-form.tsx ← UI de dominio
 src/components/characters/dynamic-field.tsx
-src/lib/characters/character-schema.ts             ← validación Zod (no-UI)
-src/lib/mocks/playbooks.ts
+src/schemas/character-schema.ts                    ← validación Zod (no-UI)
+src/hooks/use-create-character.ts                   ← mutación TanStack Query
+src/mocks/sample-characters.ts
 ```
 
-Cada archivo nuevo bajo `src/app`, `src/components` o `src/lib` va con su test
-pareado al lado (lo exige el pre-commit), salvo exentos: `*.types.ts`, barrels
-`index.*`, y vendor `components/ui/`.
+Cada archivo nuevo bajo `src/app`, `src/components`, `src/hooks`, `src/types`,
+`src/api`, `src/schemas`, `src/mocks` o `src/utils` va con su test pareado al
+lado (lo exige el pre-commit), salvo exentos: `*.types.ts`, barrels `index.*`,
+y vendor `components/ui/`.
 
 ## Scripts
 

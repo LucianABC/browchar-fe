@@ -1,5 +1,5 @@
 import { QueryEmpty, QueryError, QueryLoading } from "@/components/query-state";
-import type { CharacterSummary } from "@/lib/types";
+import type { CharacterSummary } from "@/types";
 import { CharacterCard } from "./character-card";
 
 interface CharactersListProps {

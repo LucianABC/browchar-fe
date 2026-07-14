@@ -89,5 +89,5 @@ durable record once it's merged.
 
 Run the Test plan checklist for real, then open with the review-standards
 skill in mind — a PR that will fail that review on obvious points (missing
-paired tests, inline types duplicating `src/lib/types`, deep relative
+paired tests, inline types duplicating `src/types`, deep relative
 imports) is worth fixing before requesting review rather than after.

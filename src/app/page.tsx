@@ -4,7 +4,7 @@ import { ArrowRight, Dices, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CharacterCard } from "@/components/characters/character-card";
-import { SAMPLE_CHARACTERS } from "@/lib/mocks/sample-characters";
+import { SAMPLE_CHARACTERS } from "@/mocks/sample-characters";
 
 /**
  * Placeholder hasta que exista el feature de Characters (hook + api module,

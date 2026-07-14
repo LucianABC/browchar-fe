@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 
-import { apiClient } from "@/lib/api/client";
-import type { CharacterView, CreateCharacterInput } from "@/lib/types";
+import { apiClient } from "@/api/client";
+import type { CharacterView, CreateCharacterInput } from "@/types";
 
 /**
  * Crea un personaje contra `POST /characters` (DEV-47/DEV-48).
