@@ -57,6 +57,7 @@ a known issue or a future consideration in a commit message.
 
 ### Known Issues
 
+- CharacterDetail's Cancelar button (src/components/characters/characterDetail.tsx) reverts to the character's original pre-session values instead of the last successfully saved edit, because handleCancel resets to a memoized defaultValues pinned to the initial props rather than react-hook-form's own updated baseline. Repro: edit a field, Guardar cambios, edit again, Cancelar — the first save is silently discarded. Fix: use reset() with no arguments (reverts to react-hook-form's internally tracked defaults, which handleValid's reset(data) already keeps in sync) instead of reset(defaultValues).
 - `apiClient`'s `request` doesn't catch network-level failures (e.g. `fetch`
   rejecting with a `TypeError` when offline or on a DNS/CORS failure) — only
   non-2xx HTTP responses are wrapped in `ApiError`. Callers doing

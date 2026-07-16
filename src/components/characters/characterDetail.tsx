@@ -95,6 +95,14 @@ export function CharacterDetail({
   const fieldError = (id: string) => valuesErrors?.[id]?.message;
 
   const handleCancel = () => {
+    // Known issue (ver PR #28 / DEV-65): `defaultValues` queda pinneado a los
+    // `character`/`playbook` props originales, así que tras un Guardar
+    // cambios exitoso, Cancelar revierte hasta el estado pre-sesión en vez
+    // del último guardado — descarta silenciosamente ese guardado. Bajo
+    // impacto hoy porque Guardar cambios es un stub sin persistencia real;
+    // se corrige junto con la integración real de PATCH /characters/:id
+    // (DEV-53/DEV-65), donde probablemente alcance con `reset()` sin
+    // argumentos en vez de `reset(defaultValues)`.
     reset(defaultValues);
   };
 
