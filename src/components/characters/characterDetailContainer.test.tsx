@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 import { CharacterDetailContainer } from "./characterDetailContainer";
@@ -86,6 +86,64 @@ describe("CharacterDetailContainer", () => {
       "/playbooks/angel",
       expect.objectContaining({ method: "GET" }),
     );
+  });
+
+  it("guarda cambios contra PATCH /characters/:id", async () => {
+    useRouter.mockReturnValue({ push });
+    const fetchMock = vi.fn((url: string, init?: RequestInit) => {
+      if (String(url).startsWith("/playbooks")) {
+        return Promise.resolve(mockResponse(200, playbook));
+      }
+      if (init?.method === "PATCH") {
+        return Promise.resolve(
+          mockResponse(200, { ...character, name: "Nuevo nombre" }),
+        );
+      }
+      return Promise.resolve(mockResponse(200, character));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderWithClient(<CharacterDetailContainer characterId="char_1" />);
+
+    const nameInput = await screen.findByLabelText(/Nombre/);
+    fireEvent.change(nameInput, { target: { value: "Nuevo nombre" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/characters/char_1",
+        expect.objectContaining({
+          method: "PATCH",
+          body: JSON.stringify({ name: "Nuevo nombre", values: {} }),
+        }),
+      ),
+    );
+  });
+
+  it("muestra un error si el guardado falla", async () => {
+    useRouter.mockReturnValue({ push });
+    const fetchMock = vi.fn((url: string, init?: RequestInit) => {
+      if (String(url).startsWith("/playbooks")) {
+        return Promise.resolve(mockResponse(200, playbook));
+      }
+      if (init?.method === "PATCH") {
+        return Promise.resolve(
+          mockResponse(404, { message: "Character char_1 no encontrado" }),
+        );
+      }
+      return Promise.resolve(mockResponse(200, character));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderWithClient(<CharacterDetailContainer characterId="char_1" />);
+
+    const nameInput = await screen.findByLabelText(/Nombre/);
+    fireEvent.change(nameInput, { target: { value: "Nuevo nombre" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+
+    expect(
+      await screen.findByText("Este personaje no existe o fue eliminado."),
+    ).toBeInTheDocument();
   });
 
   it("muestra un mensaje específico cuando el personaje no existe (404)", async () => {

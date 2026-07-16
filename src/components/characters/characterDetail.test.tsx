@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 
+import { ApiError } from "@/api/client";
 import { FieldType, type CharacterView, type PlaybookView } from "@/types";
 import { CharacterDetail } from "./characterDetail";
 
@@ -175,6 +182,184 @@ describe("CharacterDetail", () => {
     expect(screen.getByLabelText("Apodo")).toHaveValue("Nuevo apodo");
   });
 
+  it("deshabilita el formulario mientras el guardado estÃ¡ pendiente", async () => {
+    useRouter.mockReturnValue({ push });
+    let resolveSave!: () => void;
+    const onSave = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveSave = resolve;
+        }),
+    );
+
+    render(
+      <CharacterDetail
+        character={character}
+        playbook={playbook}
+        onSave={onSave}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Apodo"), {
+      target: { value: "Nuevo apodo" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledOnce());
+    expect(screen.getByLabelText(/Nombre/)).toBeDisabled();
+    expect(screen.getByLabelText("Apodo")).toBeDisabled();
+    expect(
+      screen.getByRole("checkbox", { name: /Tiene reputaci/ }),
+    ).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("combobox", { name: "Look" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Eliminar/ })).toBeDisabled();
+
+    resolveSave();
+    await waitFor(() => expect(screen.getByLabelText("Apodo")).toBeEnabled());
+  });
+
+  it('muestra un mensaje de "no existe" cuando onSave rechaza con un 404', async () => {
+    useRouter.mockReturnValue({ push });
+    const onSave = vi
+      .fn()
+      .mockRejectedValue(new ApiError(404, "Character char_1 no encontrado"));
+
+    render(
+      <CharacterDetail
+        character={character}
+        playbook={playbook}
+        onSave={onSave}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Apodo"), {
+      target: { value: "Nuevo apodo" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+
+    expect(
+      await screen.findByText("Este personaje no existe o fue eliminado."),
+    ).toBeInTheDocument();
+    // El baseline no cambia: sigue dirty, con el valor sin guardar.
+    expect(screen.getByLabelText("Apodo")).toHaveValue("Nuevo apodo");
+    expect(
+      screen.getByRole("button", { name: "Guardar cambios" }),
+    ).not.toBeDisabled();
+  });
+
+  it("muestra el mensaje del back cuando onSave rechaza con un 400 de validación", async () => {
+    useRouter.mockReturnValue({ push });
+    const onSave = vi
+      .fn()
+      .mockRejectedValue(
+        new ApiError(400, "Los datos del personaje no son válidos"),
+      );
+
+    render(
+      <CharacterDetail
+        character={character}
+        playbook={playbook}
+        onSave={onSave}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Apodo"), {
+      target: { value: "Nuevo apodo" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+
+    expect(
+      await screen.findByText("Los datos del personaje no son válidos"),
+    ).toBeInTheDocument();
+  });
+
+  it("muestra un mensaje genérico ante un error inesperado de onSave", async () => {
+    useRouter.mockReturnValue({ push });
+    const onSave = vi.fn().mockRejectedValue(new Error("network down"));
+
+    render(
+      <CharacterDetail
+        character={character}
+        playbook={playbook}
+        onSave={onSave}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Apodo"), {
+      target: { value: "Nuevo apodo" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+
+    expect(
+      await screen.findByText(
+        "No se pudo guardar el personaje. Intentá de nuevo más tarde.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('"Cancelar" descarta un error de guardado previo', async () => {
+    useRouter.mockReturnValue({ push });
+    const onSave = vi
+      .fn()
+      .mockRejectedValue(new ApiError(404, "Character char_1 no encontrado"));
+
+    render(
+      <CharacterDetail
+        character={character}
+        playbook={playbook}
+        onSave={onSave}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Apodo"), {
+      target: { value: "Nuevo apodo" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    await screen.findByText("Este personaje no existe o fue eliminado.");
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+
+    expect(
+      screen.queryByText("Este personaje no existe o fue eliminado."),
+    ).not.toBeInTheDocument();
+  });
+
+  it('"Cancelar" tras un guardado exitoso vuelve al último guardado, no al valor original', async () => {
+    useRouter.mockReturnValue({ push });
+    const onSave = vi.fn().mockResolvedValue(undefined);
+
+    render(
+      <CharacterDetail
+        character={character}
+        playbook={playbook}
+        onSave={onSave}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Apodo"), {
+      target: { value: "Primer guardado" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Guardar cambios" }),
+      ).toBeDisabled(),
+    );
+
+    fireEvent.change(screen.getByLabelText("Apodo"), {
+      target: { value: "Edición sin guardar" },
+    });
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Cancelar" }),
+      ).not.toBeDisabled(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+
+    expect(screen.getByLabelText("Apodo")).toHaveValue("Primer guardado");
+  });
+
   it("no permite guardar si un campo requerido queda vacío", async () => {
     useRouter.mockReturnValue({ push });
     const onSave = vi.fn().mockResolvedValue(undefined);
@@ -220,5 +405,107 @@ describe("CharacterDetail", () => {
     render(<CharacterDetail character={character} playbook={playbook} />);
 
     expect(screen.getByRole("button", { name: /Eliminar/ })).not.toBeDisabled();
+  });
+
+  describe("auto-save (DEV-65)", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("dispara un guardado automático a los 7s si hay cambios sin guardar", async () => {
+      useRouter.mockReturnValue({ push });
+      vi.useFakeTimers();
+      const onSave = vi.fn().mockResolvedValue(undefined);
+
+      render(
+        <CharacterDetail
+          character={character}
+          playbook={playbook}
+          onSave={onSave}
+        />,
+      );
+
+      fireEvent.change(screen.getByLabelText("Apodo"), {
+        target: { value: "Nuevo apodo" },
+      });
+      await vi.advanceTimersByTimeAsync(7000);
+
+      expect(onSave).toHaveBeenCalledWith(
+        expect.objectContaining({
+          values: expect.objectContaining({ moniker: "Nuevo apodo" }),
+        }),
+      );
+    });
+
+    it("no dispara auto-save si no hay cambios sin guardar", async () => {
+      useRouter.mockReturnValue({ push });
+      vi.useFakeTimers();
+      const onSave = vi.fn().mockResolvedValue(undefined);
+
+      render(
+        <CharacterDetail
+          character={character}
+          playbook={playbook}
+          onSave={onSave}
+        />,
+      );
+
+      await vi.advanceTimersByTimeAsync(10000);
+
+      expect(onSave).not.toHaveBeenCalled();
+    });
+
+    it('muestra "Guardando…" y después "Guardado" junto al botón', async () => {
+      useRouter.mockReturnValue({ push });
+      vi.useFakeTimers();
+      const onSave = vi.fn().mockResolvedValue(undefined);
+
+      render(
+        <CharacterDetail
+          character={character}
+          playbook={playbook}
+          onSave={onSave}
+        />,
+      );
+
+      fireEvent.change(screen.getByLabelText("Apodo"), {
+        target: { value: "Nuevo apodo" },
+      });
+      await vi.advanceTimersByTimeAsync(7000);
+
+      expect(screen.getByRole("status")).toHaveTextContent("Guardado");
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(10000);
+      });
+
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    it("sigue guardando automáticamente tras cada intervalo mientras siga dirty", async () => {
+      useRouter.mockReturnValue({ push });
+      vi.useFakeTimers();
+      const onSave = vi.fn().mockResolvedValue(undefined);
+
+      render(
+        <CharacterDetail
+          character={character}
+          playbook={playbook}
+          onSave={onSave}
+        />,
+      );
+
+      fireEvent.change(screen.getByLabelText("Apodo"), {
+        target: { value: "Primero" },
+      });
+      await vi.advanceTimersByTimeAsync(7000);
+      expect(onSave).toHaveBeenCalledTimes(1);
+
+      fireEvent.change(screen.getByLabelText("Apodo"), {
+        target: { value: "Segundo" },
+      });
+      await vi.advanceTimersByTimeAsync(7000);
+      expect(onSave).toHaveBeenCalledTimes(2);
+    });
   });
 });
