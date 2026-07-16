@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { QueryError, QueryLoading } from "@/components/queryState";
 import { useCharacter } from "@/hooks/useCharacter";
 import { usePlaybook } from "@/hooks/usePlaybook";
+import { useUpdateCharacter } from "@/hooks/useUpdateCharacter";
+import type { CharacterFormValues } from "@/schemas/characterSchema";
 import { CharacterDetail } from "./characterDetail";
 
 interface CharacterDetailContainerProps {
@@ -33,13 +35,16 @@ function BackLink() {
  * Trae el personaje real vía `GET /characters/:id` (DEV-63) y, una vez
  * resuelto, su Playbook (`GET /playbooks/:id`) para poder etiquetar los
  * `values` con el `template` vigente. Delega el render a `CharacterDetail`,
- * que sigue siendo presentacional.
+ * que sigue siendo presentacional — acá se conecta `onSave` a
+ * `useUpdateCharacter` (`PATCH /characters/:id`, DEV-68); `CharacterDetail`
+ * solo sabe llamar el callback y mostrar loading/error, no de dónde sale.
  *
  * El 404 de `useCharacter` (personaje inexistente o soft-deleted, ver
  * `characters.service.ts` en browchar-api) se distingue de otros errores
  * para mostrar un mensaje específico en vez del genérico de `QueryError`.
  * La validación de ownership (DEV-64) queda pendiente hasta que exista auth
- * (DEV-5): hoy cualquiera puede ver el detalle de cualquier personaje.
+ * (DEV-5): hoy cualquiera puede ver o editar el detalle de cualquier
+ * personaje.
  */
 export function CharacterDetailContainer({
   characterId,
@@ -48,6 +53,11 @@ export function CharacterDetailContainer({
   const playbook = usePlaybook(character.data?.playbookId ?? "", {
     enabled: character.isSuccess,
   });
+  const updateCharacter = useUpdateCharacter(characterId);
+
+  const handleSave = async (values: CharacterFormValues) => {
+    await updateCharacter.mutateAsync(values);
+  };
 
   if (character.isPending) {
     return (
@@ -94,6 +104,10 @@ export function CharacterDetailContainer({
   }
 
   return (
-    <CharacterDetail character={character.data} playbook={playbook.data} />
+    <CharacterDetail
+      character={character.data}
+      playbook={playbook.data}
+      onSave={handleSave}
+    />
   );
 }
