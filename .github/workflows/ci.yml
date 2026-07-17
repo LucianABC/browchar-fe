@@ -69,8 +69,10 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      # --coverage aplica el thresholds de vitest.config.mts (DEV-37): la
+      # corrida falla si la cobertura baja del umbral acordado.
       - name: Test
-        run: npm run test:run
+        run: npm run test:coverage
 
       - name: Build
         run: npm run build

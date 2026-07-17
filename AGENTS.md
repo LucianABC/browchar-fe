@@ -42,3 +42,12 @@ Importá siempre por alias `@/...`. Todo archivo nuevo bajo
 `src/app|components|hooks|types|api|schemas|mocks|utils` va con su test
 pareado (salvo `*.types.ts`, `index.*` y `components/ui/`). Ver "Estructura
 del proyecto" en el README para el detalle y un ejemplo.
+
+## Coverage gate (DEV-37)
+
+`npm run test:coverage` corre Vitest con `--coverage` (provider v8) y aplica
+los `thresholds` de `vitest.config.mts`. La corrida (y el CI) **falla** si la
+cobertura global baja de **88% statements / 82% branches / 85% functions /
+88% lines**. El `include`/`exclude` del coverage refleja la misma convención de
+test pareado de arriba (excluye `*.types.ts`, `index.*`, `components/ui/` y
+`app/layout.tsx`, el shell RSC raíz; las pages con test pareado SÍ cuentan).
