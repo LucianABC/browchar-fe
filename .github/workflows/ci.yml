@@ -37,6 +37,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Aviso de drift contra GitHub Packages. Warning-only a propósito: un
+      # publish nuevo de contracts no debe poner en rojo PRs del FE cuyo diff
+      # no tiene nada que ver (mismo criterio por el que no hay npm audit
+      # como gate). El chequeo bloqueante equivalente vive en el publish de
+      # browchar-api (publish-contracts.yml).
+      - name: Check contracts version freshness (warning only)
+        run: |
+          LATEST=$(npm view @tpklabs/browchar-contracts version 2>/dev/null) || {
+            echo "::warning::No se pudo consultar la última versión de @tpklabs/browchar-contracts en GitHub Packages — chequeo de frescura salteado."
+            exit 0
+          }
+          INSTALLED=$(node -p "require('./node_modules/@tpklabs/browchar-contracts/package.json').version")
+          PIN=$(node -p "require('./package.json').dependencies['@tpklabs/browchar-contracts']")
+          if [ "$INSTALLED" = "$LATEST" ]; then
+            echo "@tpklabs/browchar-contracts $INSTALLED instalado = última publicada."
+          elif npx --yes semver --range "$PIN" "$LATEST" > /dev/null; then
+            echo "::warning::@tpklabs/browchar-contracts instalado en $INSTALLED pero la última publicada es $LATEST y el pin $PIN la admite — falta un npm update @tpklabs/browchar-contracts (+ lockfile)."
+          else
+            echo "::warning::Drift duro de @tpklabs/browchar-contracts: el pin $PIN NO admite la última publicada $LATEST (instalado: $INSTALLED). Bumpear el pin en package.json y regenerar el lockfile."
+          fi
+
       - name: Format check
         run: npm run format:check
 
