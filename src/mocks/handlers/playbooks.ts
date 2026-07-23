@@ -1,11 +1,12 @@
 import { http, HttpResponse } from "msw";
-import type { PlaybookView } from "@/types";
 
 /** Handlers base de Playbooks (DEV-200). Ver nota de defaults en `characters.ts`. */
 export const playbooksHandlers = [
   http.get("/playbooks", () => {
-    const body: PlaybookView[] = [];
-    return HttpResponse.json(body);
+    return HttpResponse.json(
+      { message: "GET /playbooks sin handler configurado en este test" },
+      { status: 501 },
+    );
   }),
 
   http.get("/playbooks/:id", ({ params }) => {

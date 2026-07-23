@@ -1,26 +1,21 @@
 import { http, HttpResponse } from "msw";
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from "@/types";
-import type { CharacterListResponse } from "@/types";
 
 /**
- * Handlers base de Characters (DEV-200). Defaults inertes: GET devuelve
- * envelopes vacíos / 404 genérico, POST/PATCH devuelven 501 — casi todo test
- * necesita su propio fixture, así que un happy-path por defecto solo
- * escondería una configuración faltante. Cada test lo pisa con
- * `server.use(...)` (ver `src/mocks/server.ts`).
+ * Handlers base de Characters (DEV-200). Defaults inertes de verdad: TODOS
+ * devuelven 404/501, nunca un 200/204 "vacío" — un listado vacío o un delete
+ * exitoso son resultados que un test tiene que pedir explícitamente con
+ * `server.use(...)` (ver `src/mocks/server.ts`), no algo que el default
+ * decida por él. Si el default devolviera un 200 con lista vacía, un test de
+ * "estado vacío" podría pasar sin haber configurado nada — pasaría igual
+ * aunque el mock esté roto o directamente ausente, que es exactamente lo que
+ * este gate quiere evitar.
  */
 export const charactersHandlers = [
-  http.get("/characters", ({ request }) => {
-    const url = new URL(request.url);
-    const page = Number(url.searchParams.get("page") ?? DEFAULT_PAGE);
-    const pageSize = Number(
-      url.searchParams.get("pageSize") ?? DEFAULT_PAGE_SIZE,
+  http.get("/characters", () => {
+    return HttpResponse.json(
+      { message: "GET /characters sin handler configurado en este test" },
+      { status: 501 },
     );
-    const body: CharacterListResponse = {
-      data: [],
-      meta: { page, pageSize, total: 0 },
-    };
-    return HttpResponse.json(body);
   }),
 
   http.get("/characters/:id", ({ params }) => {
@@ -50,6 +45,11 @@ export const charactersHandlers = [
   // agregado igual porque el ticket DEV-200 lo lista explícitamente en el
   // alcance, listo para cuando exista.
   http.delete("/characters/:id", () => {
-    return new HttpResponse(null, { status: 204 });
+    return HttpResponse.json(
+      {
+        message: "DELETE /characters/:id sin handler configurado en este test",
+      },
+      { status: 501 },
+    );
   }),
 ];
