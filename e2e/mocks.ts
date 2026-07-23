@@ -1,25 +1,25 @@
 import type { Page, Route } from "@playwright/test";
+import type {
+  Character,
+  CharacterListResponse,
+  PlaybookView,
+  ValidationError,
+} from "@tpklabs/browchar-contracts";
+import { API_PREFIX } from "./test";
 
 /**
  * Helpers de mock de red para los E2E (DEV-199) — equivalente de
  * `page.route()` a los handlers MSW de la suite de vitest (DEV-200), mismo
  * espíritu: cada test registra la respuesta que necesita, nada corre contra
- * `browchar-api` real. A diferencia de MSW, `page.route()` no tiene un modo
- * "falla si no hay handler": una request sin mock sigue a la red real y, sin
- * un backend escuchando, falla con un error de conexión visible en la UI (no
- * queda en un limbo silencioso) — igual hay que mockear todo lo que la
- * pantalla pide.
+ * `browchar-api` real.
  *
- * Patrones de URL: `**\/recurso*` (comodín simple, sin cruzar `/`) matcheá la
+ * Patrones de URL: `**\/recurso*` (comodín simple, sin cruzar `/`) matchea la
  * lista/creación (`/characters`, con o sin query string); `**\/recurso/*`
  * matchea el detalle/update de un id (`/characters/:id`) sin pisar el
- * anterior, porque el `/` extra no lo cruza un `*` simple.
- *
- * Gotcha: `page.route()` intercepta TODO el tráfico que matchea el patrón, no
- * solo `fetch`/XHR — incluida la navegación del documento. `/characters/:id`
- * matchea tanto la llamada a la API como el `page.goto("/characters/:id")` en
- * sí; sin filtrar por `resourceType()`, el mock reemplaza la página entera
- * por el JSON crudo en vez de dejar pasar la navegación real de Next.js.
+ * anterior, porque el `/` extra no lo cruza un `*` simple. Todos van bajo
+ * `API_PREFIX` (ver `e2e/test.ts`): una request sin mock bajo ese prefijo la
+ * aborta el catch-all de `test.ts`, no cae en una page real de Next ni queda
+ * en un limbo silencioso.
  */
 async function jsonRoute(
   page: Page,
@@ -28,6 +28,10 @@ async function jsonRoute(
   handler: (route: Route) => Promise<void> | void,
 ): Promise<void> {
   await page.route(pattern, async (route) => {
+    // Defensa adicional (ya no debería dispararse con el namespacing de
+    // API_PREFIX, que separa las llamadas a la API de las propias rutas y
+    // fetches de RSC/prefetch de Next): solo intercepta fetch/XHR, no
+    // navegación de documento.
     const resourceType = route.request().resourceType();
     if (resourceType !== "fetch" && resourceType !== "xhr") {
       await route.fallback();
@@ -41,51 +45,70 @@ async function jsonRoute(
   });
 }
 
-export function mockPlaybooksList(page: Page, playbooks: unknown) {
-  return jsonRoute(page, "**/playbooks*", "GET", (route) =>
+export function mockPlaybooksList(page: Page, playbooks: PlaybookView[]) {
+  return jsonRoute(page, `**${API_PREFIX}/playbooks*`, "GET", (route) =>
     route.fulfill({ json: playbooks }),
   );
 }
 
-export function mockPlaybookDetail(page: Page, playbook: unknown) {
-  return jsonRoute(page, "**/playbooks/*", "GET", (route) =>
+export function mockPlaybookDetail(page: Page, playbook: PlaybookView) {
+  return jsonRoute(page, `**${API_PREFIX}/playbooks/*`, "GET", (route) =>
     route.fulfill({ json: playbook }),
   );
 }
 
-export function mockCharactersList(page: Page, envelope: unknown) {
-  return jsonRoute(page, "**/characters*", "GET", (route) =>
+export function mockCharactersList(
+  page: Page,
+  envelope: CharacterListResponse,
+) {
+  return jsonRoute(page, `**${API_PREFIX}/characters*`, "GET", (route) =>
     route.fulfill({ json: envelope }),
   );
 }
 
-export function mockCharacterDetail(page: Page, character: unknown) {
-  return jsonRoute(page, "**/characters/*", "GET", (route) =>
+export function mockCharacterDetail(page: Page, character: Character) {
+  return jsonRoute(page, `**${API_PREFIX}/characters/*`, "GET", (route) =>
     route.fulfill({ json: character }),
   );
 }
 
+/** Envelope de error que devuelve la API en 400/404 (ver `ApiError` en `src/api/client.ts`). */
+interface ApiErrorBody {
+  message: string;
+  errors?: ValidationError[];
+}
+
 interface MutationResult {
   status?: number;
-  json: unknown;
+  json: Character | ApiErrorBody;
 }
 
 export function mockCreateCharacter(
   page: Page,
   handler: (body: unknown) => MutationResult,
 ) {
-  return jsonRoute(page, "**/characters*", "POST", async (route) => {
-    const { status = 201, json } = handler(route.request().postDataJSON());
-    await route.fulfill({ status, json });
-  });
+  return jsonRoute(
+    page,
+    `**${API_PREFIX}/characters*`,
+    "POST",
+    async (route) => {
+      const { status = 201, json } = handler(route.request().postDataJSON());
+      await route.fulfill({ status, json });
+    },
+  );
 }
 
 export function mockUpdateCharacter(
   page: Page,
   handler: (body: unknown) => MutationResult,
 ) {
-  return jsonRoute(page, "**/characters/*", "PATCH", async (route) => {
-    const { status = 200, json } = handler(route.request().postDataJSON());
-    await route.fulfill({ status, json });
-  });
+  return jsonRoute(
+    page,
+    `**${API_PREFIX}/characters/*`,
+    "PATCH",
+    async (route) => {
+      const { status = 200, json } = handler(route.request().postDataJSON());
+      await route.fulfill({ status, json });
+    },
+  );
 }

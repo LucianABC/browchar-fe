@@ -1,10 +1,10 @@
-import { expect, test } from "@playwright/test";
 import { CHARACTER, PLAYBOOK } from "./fixtures";
 import {
   mockCharacterDetail,
   mockPlaybookDetail,
   mockUpdateCharacter,
 } from "./mocks";
+import { expect, test } from "./test";
 
 test("edita el nombre de un personaje y guarda el cambio", async ({ page }) => {
   await mockCharacterDetail(page, CHARACTER);

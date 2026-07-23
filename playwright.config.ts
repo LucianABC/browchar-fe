@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { API_PREFIX } from "./e2e/test";
 
 /**
  * E2E black-box (DEV-199): dirige un browser real contra la app renderizada,
@@ -6,11 +7,16 @@ import { defineConfig, devices } from "@playwright/test";
  * `e2e/mocks.ts`) — no depende de `browchar-api` ni de Docker. Decisión
  * documentada en el README ("E2E tests").
  *
- * `NEXT_PUBLIC_API_URL: ""` fuerza fetches relativos al origin de la app
- * (`http://localhost:3001/characters`, no una URL cruzada a otro host), igual
- * criterio que vitest (`BASE_URL` cae en `""` porque no carga `.env.local`) —
- * determinista sin importar qué tenga configurado el `.env.local` de quien
- * corre los tests localmente.
+ * `NEXT_PUBLIC_API_URL: API_PREFIX` (no `""`) namespacea las llamadas a la API
+ * bajo una ruta que Next.js nunca sirve — con `""` los fetches del cliente van
+ * a las mismas rutas relativas que las propias pages (`/characters`,
+ * `/characters/:id`), lo que deja una request sin mock caer silenciosamente
+ * en la page real de Next (HTML 200) en vez de fallar visible, y hace que los
+ * mocks también intercepten los fetches internos de RSC/prefetch del App
+ * Router. Ver `e2e/test.ts` para el detalle completo. Determinista sin
+ * importar qué tenga configurado el `.env.local` de quien corre los tests
+ * localmente (mismo motivo que vitest: `BASE_URL` ahí cae en `""` porque no
+ * carga `.env.local`).
  */
 export default defineConfig({
   testDir: "./e2e",
@@ -27,7 +33,7 @@ export default defineConfig({
     command: "npm run dev",
     url: "http://localhost:3001",
     reuseExistingServer: !process.env.CI,
-    env: { NEXT_PUBLIC_API_URL: "" },
+    env: { NEXT_PUBLIC_API_URL: API_PREFIX },
     timeout: 120_000,
   },
 });

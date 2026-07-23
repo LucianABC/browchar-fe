@@ -1,6 +1,6 @@
-import { expect, test } from "@playwright/test";
 import { PLAYBOOK } from "./fixtures";
 import { mockCreateCharacter, mockPlaybooksList } from "./mocks";
+import { expect, test } from "./test";
 
 test.describe("Crear personaje", () => {
   test("elige juego y playbook, completa la ficha y crea el personaje", async ({

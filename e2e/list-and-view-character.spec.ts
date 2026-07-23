@@ -1,10 +1,10 @@
-import { expect, test } from "@playwright/test";
 import { CHARACTER, CHARACTER_LIST_ITEM, PLAYBOOK } from "./fixtures";
 import {
   mockCharacterDetail,
   mockCharactersList,
   mockPlaybookDetail,
 } from "./mocks";
+import { expect, test } from "./test";
 
 test("lista los personajes y navega al detalle de uno", async ({ page }) => {
   await mockCharactersList(page, {
