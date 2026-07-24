@@ -83,6 +83,11 @@ interface MutationResult {
   json: Character | ApiErrorBody;
 }
 
+interface DeleteResult {
+  status?: number;
+  json?: ApiErrorBody;
+}
+
 export function mockCreateCharacter(
   page: Page,
   handler: (body: unknown) => MutationResult,
@@ -109,6 +114,21 @@ export function mockUpdateCharacter(
     async (route) => {
       const { status = 200, json } = handler(route.request().postDataJSON());
       await route.fulfill({ status, json });
+    },
+  );
+}
+
+export function mockDeleteCharacter(
+  page: Page,
+  handler: () => DeleteResult = () => ({ status: 204 }),
+) {
+  return jsonRoute(
+    page,
+    `**${API_PREFIX}/characters/*`,
+    "DELETE",
+    async (route) => {
+      const { status = 204, json } = handler();
+      await route.fulfill(json === undefined ? { status } : { status, json });
     },
   );
 }

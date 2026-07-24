@@ -4,9 +4,9 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { createElement, type ReactNode } from "react";
 import { http, HttpResponse } from "msw";
 
+import { characterQueryKey } from "@/hooks/useCharacter";
+import { useDeleteCharacter } from "@/hooks/useDeleteCharacter";
 import { server } from "@/mocks/server";
-import { characterQueryKey } from "./useCharacter";
-import { useDeleteCharacter } from "./useDeleteCharacter";
 
 function createWrapper(queryClient: QueryClient) {
   return function Wrapper({ children }: { children: ReactNode }) {

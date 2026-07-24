@@ -11,8 +11,9 @@ import { ApiError } from "@/api/client";
 import { FieldType, type CharacterView, type PlaybookView } from "@/types";
 import { CharacterDetail } from "./characterDetail";
 
-const { push, useRouter } = vi.hoisted(() => ({
+const { push, replace, useRouter } = vi.hoisted(() => ({
   push: vi.fn(),
+  replace: vi.fn(),
   useRouter: vi.fn(),
 }));
 
@@ -380,7 +381,7 @@ describe("CharacterDetail", () => {
   });
 
   it('"Eliminar" pide confirmación y, al aceptar, llama a onDelete y vuelve al listado', async () => {
-    useRouter.mockReturnValue({ push });
+    useRouter.mockReturnValue({ replace });
     const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
     const onDelete = vi.fn().mockResolvedValue(undefined);
 
@@ -394,12 +395,12 @@ describe("CharacterDetail", () => {
     fireEvent.click(screen.getByRole("button", { name: /Eliminar/ }));
 
     expect(confirmSpy).toHaveBeenCalledWith("¿Eliminar a Doc?");
-    await waitFor(() => expect(push).toHaveBeenCalledWith("/characters"));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/characters"));
     expect(onDelete).toHaveBeenCalledOnce();
   });
 
   it("Eliminar no llama a onDelete ni navega si se cancela la confirmación", () => {
-    useRouter.mockReturnValue({ push });
+    useRouter.mockReturnValue({ replace });
     vi.spyOn(window, "confirm").mockReturnValue(false);
     const onDelete = vi.fn().mockResolvedValue(undefined);
 
@@ -413,7 +414,7 @@ describe("CharacterDetail", () => {
     fireEvent.click(screen.getByRole("button", { name: /Eliminar/ }));
 
     expect(onDelete).not.toHaveBeenCalled();
-    expect(push).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
   });
 
   it("Eliminar siempre está habilitado, haya o no cambios sin guardar", () => {
@@ -424,7 +425,7 @@ describe("CharacterDetail", () => {
   });
 
   it('muestra "Eliminando…" y deshabilita el botón mientras onDelete está pendiente', async () => {
-    useRouter.mockReturnValue({ push });
+    useRouter.mockReturnValue({ replace });
     vi.spyOn(window, "confirm").mockReturnValue(true);
     let resolveDelete!: () => void;
     const onDelete = vi.fn(
@@ -441,19 +442,26 @@ describe("CharacterDetail", () => {
         onDelete={onDelete}
       />,
     );
+    const nameInput = screen.getByLabelText(/Nombre/);
+    fireEvent.change(nameInput, { target: { value: "Doc editado" } });
     fireEvent.click(screen.getByRole("button", { name: /Eliminar/ }));
 
     await waitFor(() =>
       expect(screen.getByRole("button", { name: /Eliminando/ })).toBeDisabled(),
     );
-    expect(push).not.toHaveBeenCalled();
+    expect(nameInput).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Guardar cambios" }),
+    ).toBeDisabled();
+    expect(replace).not.toHaveBeenCalled();
 
     resolveDelete();
-    await waitFor(() => expect(push).toHaveBeenCalledWith("/characters"));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/characters"));
   });
 
   it("muestra un mensaje cuando onDelete rechaza con un 404 y no navega", async () => {
-    useRouter.mockReturnValue({ push });
+    useRouter.mockReturnValue({ replace });
     vi.spyOn(window, "confirm").mockReturnValue(true);
     const onDelete = vi
       .fn()
@@ -471,12 +479,12 @@ describe("CharacterDetail", () => {
     expect(
       await screen.findByText("Este personaje ya no existe o fue eliminado."),
     ).toBeInTheDocument();
-    expect(push).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: /Eliminar/ })).not.toBeDisabled();
   });
 
   it("muestra un mensaje genérico cuando onDelete rechaza con un error inesperado", async () => {
-    useRouter.mockReturnValue({ push });
+    useRouter.mockReturnValue({ replace });
     vi.spyOn(window, "confirm").mockReturnValue(true);
     const onDelete = vi.fn().mockRejectedValue(new Error("network down"));
 

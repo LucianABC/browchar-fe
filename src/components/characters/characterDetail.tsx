@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -27,6 +27,7 @@ import {
   buildValuesFromCharacter,
   type CharacterFormValues,
 } from "@/schemas/characterSchema";
+import { deleteErrorMessage } from "./deleteErrorMessage";
 import { DynamicField } from "./dynamicField";
 
 interface CharacterDetailProps {
@@ -73,13 +74,6 @@ function saveErrorMessage(error: unknown): string {
   return "No se pudo guardar el personaje. Intentá de nuevo más tarde.";
 }
 
-function deleteErrorMessage(error: unknown): string {
-  if (error instanceof ApiError && error.status === 404) {
-    return "Este personaje ya no existe o fue eliminado.";
-  }
-  return "No se pudo eliminar el personaje. Intentá de nuevo más tarde.";
-}
-
 /**
  * Detalle de un Character (DEV-51). No hay modo solo-lectura: los campos
  * siempre están listos para editar (mismo `DynamicField` que arma
@@ -121,6 +115,7 @@ export function CharacterDetail({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const isDeletingRef = useRef(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<
     "idle" | "saving" | "saved"
   >("idle");
@@ -179,6 +174,7 @@ export function CharacterDetail({
   /** Guarda `data` y fija el nuevo baseline. Usado por el submit manual y por el auto-save. */
   const persist = async (data: CharacterFormValues) => {
     setSaveError(null);
+    setDeleteError(null);
     await onSave(data);
     // Fija los valores guardados como nuevo baseline: el form queda
     // "limpio" (isDirty vuelve a false) hasta la próxima edición.
@@ -194,7 +190,16 @@ export function CharacterDetail({
     }
   };
 
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    if (isDeletingRef.current) {
+      event.preventDefault();
+      return;
+    }
+    void handleSubmit(handleValid)(event);
+  };
+
   const runAutoSave = async (data: CharacterFormValues) => {
+    if (isDeletingRef.current) return;
     setAutoSaveStatus("saving");
     try {
       await persist(data);
@@ -223,7 +228,7 @@ export function CharacterDetail({
   useEffect(() => {
     if (!isDirty) return;
     const id = setInterval(() => {
-      if (isSubmittingRef.current) return;
+      if (isSubmittingRef.current || isDeletingRef.current) return;
       void handleSubmit((data) => runAutoSaveRef.current(data))();
     }, AUTO_SAVE_INTERVAL_MS);
     return () => clearInterval(id);
@@ -237,18 +242,26 @@ export function CharacterDetail({
   }, []);
 
   const handleDelete = async () => {
+    if (isDeletingRef.current) return;
     if (!window.confirm(`¿Eliminar a ${character.name}?`)) return;
 
+    isDeletingRef.current = true;
     setDeleteError(null);
+    setSaveError(null);
     setIsDeleting(true);
     try {
       await onDelete();
-      router.push("/characters");
+      // El detalle deja de ser una entrada válida del historial después del
+      // borrado: replace evita que "Atrás" vuelva a una pantalla que dará 404.
+      router.replace("/characters");
     } catch (error) {
+      isDeletingRef.current = false;
       setIsDeleting(false);
       setDeleteError(deleteErrorMessage(error));
     }
   };
+
+  const isBusy = isSubmitting || isDeleting;
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-10 sm:px-6">
@@ -257,7 +270,7 @@ export function CharacterDetail({
           para lectores de pantalla. */}
       <h1 className="sr-only">{character.name}</h1>
 
-      <form onSubmit={handleSubmit(handleValid)} noValidate>
+      <form onSubmit={handleFormSubmit} noValidate>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Button
             variant="ghost"
@@ -279,7 +292,7 @@ export function CharacterDetail({
               variant="ghost"
               size="sm"
               onClick={handleCancel}
-              disabled={!isDirty || isSubmitting}
+              disabled={!isDirty || isBusy}
             >
               Cancelar
             </Button>
@@ -288,7 +301,7 @@ export function CharacterDetail({
               variant="destructive"
               size="sm"
               onClick={handleDelete}
-              disabled={isSubmitting || isDeleting}
+              disabled={isBusy}
             >
               {isDeleting ? (
                 <>
@@ -302,7 +315,7 @@ export function CharacterDetail({
                 </>
               )}
             </Button>
-            <Button type="submit" size="sm" disabled={!isDirty || isSubmitting}>
+            <Button type="submit" size="sm" disabled={!isDirty || isBusy}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="animate-spin" aria-hidden />
@@ -356,7 +369,7 @@ export function CharacterDetail({
               <Input
                 id="character-name"
                 {...register("name")}
-                disabled={isSubmitting}
+                disabled={isBusy}
                 aria-invalid={Boolean(errors.name)}
                 aria-describedby={
                   errors.name ? "character-name-error" : undefined
@@ -402,7 +415,7 @@ export function CharacterDetail({
                       key={field.id}
                       field={field}
                       control={control}
-                      disabled={isSubmitting}
+                      disabled={isBusy}
                       error={fieldError(field.id)}
                     />
                   ))}

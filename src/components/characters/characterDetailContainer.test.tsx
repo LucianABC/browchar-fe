@@ -7,8 +7,9 @@ import { http, HttpResponse } from "msw";
 import { server } from "@/mocks/server";
 import { CharacterDetailContainer } from "./characterDetailContainer";
 
-const { push, useRouter } = vi.hoisted(() => ({
+const { push, replace, useRouter } = vi.hoisted(() => ({
   push: vi.fn(),
+  replace: vi.fn(),
   useRouter: vi.fn(),
 }));
 
@@ -110,7 +111,7 @@ describe("CharacterDetailContainer", () => {
   });
 
   it("elimina el personaje contra DELETE /characters/:id y vuelve al listado", async () => {
-    useRouter.mockReturnValue({ push });
+    useRouter.mockReturnValue({ replace });
     vi.spyOn(window, "confirm").mockReturnValue(true);
     mockCharacterAndPlaybook();
     let receivedUrl: string | undefined;
@@ -128,13 +129,13 @@ describe("CharacterDetailContainer", () => {
     await screen.findByLabelText(/Nombre/);
     fireEvent.click(screen.getByRole("button", { name: /Eliminar/ }));
 
-    await waitFor(() => expect(push).toHaveBeenCalledWith("/characters"));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/characters"));
     expect(receivedUrl).toBe("/characters/char_1");
     expect(receivedMethod).toBe("DELETE");
   });
 
   it("muestra un error si la eliminación falla", async () => {
-    useRouter.mockReturnValue({ push });
+    useRouter.mockReturnValue({ replace });
     vi.spyOn(window, "confirm").mockReturnValue(true);
     mockCharacterAndPlaybook();
     server.use(
@@ -154,7 +155,7 @@ describe("CharacterDetailContainer", () => {
     expect(
       await screen.findByText("Este personaje ya no existe o fue eliminado."),
     ).toBeInTheDocument();
-    expect(push).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
   });
 
   it("muestra un error si el guardado falla", async () => {
